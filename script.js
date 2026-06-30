@@ -175,18 +175,31 @@ let gameEnded = false;
 let gameStarted = false;
 let gameStartTime = 0;
 
+function isImageReady(img) {
+  return img.complete && img.naturalWidth > 0;
+}
+
+function drawImageSafe(img, x, y, w, h, fallbackColor) {
+  if (isImageReady(img)) {
+    ctx.drawImage(img, x, y, w, h);
+  } else {
+    ctx.fillStyle = fallbackColor;
+    ctx.fillRect(x, y, w, h);
+  }
+}
+
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // 유치원
-  ctx.drawImage(images.kindergarden, kindergardenPos.x, kindergardenPos.y, KINDERGARDEN_SIZE, KINDERGARDEN_SIZE);
+  drawImageSafe(images.kindergarden, kindergardenPos.x, kindergardenPos.y, KINDERGARDEN_SIZE, KINDERGARDEN_SIZE, '#ffd54f');
   ctx.font = 'bold 18px Jua, sans-serif';
   ctx.fillStyle = '#ff7f50';
   ctx.textAlign = 'center';
   // '유치원' 글자를 kindergarden 이미지 바로 위에 거의 붙여서 배치
   ctx.fillText('유치원', kindergardenPos.x + KINDERGARDEN_SIZE / 2, kindergardenPos.y - 2);
   // 집
-  ctx.drawImage(images.home, homePos.x, homePos.y, HOME_SIZE, HOME_SIZE);
+  drawImageSafe(images.home, homePos.x, homePos.y, HOME_SIZE, HOME_SIZE, '#64b5f6');
   ctx.font = 'bold 18px Jua, sans-serif';
   ctx.fillStyle = '#2196f3'; // 파란색
   ctx.textAlign = 'center';
@@ -203,18 +216,18 @@ function draw() {
       ctx.save();
       ctx.translate(v.x + VIRUS_SIZE / 2, v.y + VIRUS_SIZE / 2);
       ctx.rotate(v.angle || 0);
-      ctx.drawImage(v.img, -VIRUS_SIZE / 2, -VIRUS_SIZE / 2, VIRUS_SIZE, VIRUS_SIZE);
+      drawImageSafe(v.img, -VIRUS_SIZE / 2, -VIRUS_SIZE / 2, VIRUS_SIZE, VIRUS_SIZE, '#ef5350');
       ctx.restore();
     } else {
-      ctx.drawImage(v.img, v.x, v.y, VIRUS_SIZE, VIRUS_SIZE);
+      drawImageSafe(v.img, v.x, v.y, VIRUS_SIZE, VIRUS_SIZE, '#ef5350');
     }
   });
   // 첨가물
   additives.forEach(a => {
-    ctx.drawImage(a.img, a.x, a.y, ADDITIVE_SIZE, ADDITIVE_SIZE);
+    drawImageSafe(a.img, a.x, a.y, ADDITIVE_SIZE, ADDITIVE_SIZE, '#ab47bc');
   });
   // 세이피
-  ctx.drawImage(images.safy, safy.x, safy.y, SAFY_SIZE, SAFY_SIZE);
+  drawImageSafe(images.safy, safy.x, safy.y, SAFY_SIZE, SAFY_SIZE, '#ffb6b9');
 }
 
 function update() {
@@ -296,10 +309,43 @@ function gameLoop() {
 
 // 이미지 모두 로드 후 게임 시작
 let loaded = 0;
+let gameLoopRunning = false;
 const totalImages = 3 + images.viruses.length + images.additives.length;
 
 const startOverlay = document.getElementById('startOverlay');
 const startBtn = document.getElementById('startBtn');
+
+function startGameLoop() {
+  if (gameLoopRunning) return;
+  gameLoopRunning = true;
+  gameLoop();
+}
+
+function markImageLoaded() {
+  loaded++;
+  if (loaded >= totalImages && startOverlay.style.display === 'none') {
+    startGameLoop();
+  }
+}
+
+function checkLoaded() {
+  markImageLoaded();
+}
+
+function setupImage(img) {
+  if (img.complete) {
+    markImageLoaded();
+  } else {
+    img.onload = checkLoaded;
+    img.onerror = checkLoaded;
+  }
+}
+
+setupImage(images.safy);
+setupImage(images.kindergarden);
+setupImage(images.home);
+images.viruses.forEach(setupImage);
+images.additives.forEach(setupImage);
 
 function unlockAudio() {
   successSound.play().catch(()=>{});
@@ -316,26 +362,16 @@ startBtn.onclick = function() {
   gameStarted = true;
   gameStartTime = Date.now();
   if (loaded >= totalImages) {
-    gameLoop();
+    startGameLoop();
   } else {
-    // 이미지가 아직 다 안 불러와졌으면, 다 불러오면 시작
-    loaded = Math.max(loaded, 0); // 혹시라도 음수 방지
-    // checkLoaded에서 loaded >= totalImages가 되면 gameLoop 시작
+    setTimeout(function() {
+      if (!gameLoopRunning && startOverlay.style.display === 'none') {
+        loaded = totalImages;
+        startGameLoop();
+      }
+    }, 3000);
   }
 };
-
-// checkLoaded 함수 내에서 오버레이가 사라진 후에만 gameLoop 시작
-function checkLoaded() {
-  loaded++;
-  if (loaded >= totalImages && startOverlay.style.display === 'none') {
-    gameLoop();
-  }
-}
-images.safy.onload = checkLoaded;
-images.kindergarden.onload = checkLoaded;
-images.home.onload = checkLoaded;
-images.viruses.forEach(img => img.onload = checkLoaded);
-images.additives.forEach(img => img.onload = checkLoaded);
 
 document.getElementById('restartBtn').onclick = function() {
   location.reload();
