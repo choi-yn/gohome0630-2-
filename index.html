@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>안전하게 집에 가요</title>
+
+  <link rel="stylesheet" href="style.css">
+  <!-- 귀여운 구글 폰트 예시 -->
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="startOverlay" class="start-overlay">
+    <button id="startBtn" class="start-btn">시작하기</button>
+  </div>
+  <div class="game-container">
+    <aside class="sidebar">
+      <h1 class="game-title">안전하게 집에 가요</h1>
+      <div class="game-desc">
+        * 태블릿을 기울여 세이피가 세균과 식품첨가물을 피해 안전하게 집까지 갈 수 있도록 도와주세요. 세균이나 식품첨가물에 닿으면 유치원에서부터 다시 시작해요.
+      </div>
+      <button id="restartBtn" class="restart-btn">다시 시작</button>
+    </aside>
+    <canvas id="gameCanvas" width="900" height="500"></canvas>
+  </div>
+  <audio id="successSound" src="sound/Glow3.mp3"></audio>
+  <audio id="errorSound" src="sound/Error3.mp3"></audio>
+  
+  <!-- 성공 모달 창 -->
+  <div id="successModal" class="modal">
+    <div class="modal-content">
+      <h2>성공!</h2>
+      <p>안전하게 집에 도착!<!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+      </head>
+      <body>
+        
+      </body>
+      </html><!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+      </head>
+      <body>
+        
+      </body>
+      </html>!</p>
+      <button id="modalOkBtn" class="modal-btn">확인</button>
+    </div>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
